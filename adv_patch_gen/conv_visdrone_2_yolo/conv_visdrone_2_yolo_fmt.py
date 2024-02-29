@@ -87,61 +87,61 @@ def conv_visdrone_2_yolo(
     low_dim_cutoff: Optional[int],
     low_area_cutoff: Optional[float],
 ):
-    """
-    low_dim_cutoff: int, lower cutoff for bounding boxes width/height dims in pixels
-    low_area_cutoff: float, lower area perc cutoff for bounding box areas in perc
-    """
     if not all([osp.isdir(source_annot_dir), osp.isdir(source_image_dir)]):
         raise ValueError(f"source_annot_dir and source_image_dir must be directories")
     src_annot_path = osp.join(source_annot_dir, "*")
     src_image_path = osp.join(source_image_dir, "*")
     src_annot_paths = sorted(glob.glob(src_annot_path))
-    src_image_paths = [p for p in sorted(glob.glob(src_image_path)) if osp.splitext(p)[-1] in IMG_EXT]
-    assert len(src_image_paths) == len(src_annot_paths)
+    src_image_paths = [p for p in sorted(glob.glob(src_image_path)) if osp.splitext(p)[-1].lower() in IMG_EXT]
+    assert len(src_image_paths) == len(src_annot_paths), "Mismatch between image and annotation file counts"
 
     os.makedirs(target_annot_dir, exist_ok=True)
     low_dim_cutoff = float("-inf") if not low_dim_cutoff else low_dim_cutoff
     low_area_cutoff = float("-inf") if not low_area_cutoff else low_area_cutoff
-    target_img_list_fpath = osp.join(osp.dirname(target_annot_dir), source_annot_dir.split("/")[-2].lower() + ".txt")
+    target_img_list_fpath = osp.join(osp.dirname(target_annot_dir), osp.basename(source_annot_dir) + ".txt")
 
     with tqdm.tqdm(total=len(src_image_paths)) as pbar, open(target_img_list_fpath, "w") as imgw:
         orig_box_count = new_box_count = 0
         for src_annot_file, src_image_file in zip(src_annot_paths, src_image_paths):
-            try:
-                iw, ih = imagesize.get(src_image_file)
-                target_annot_file = osp.join(target_annot_dir, src_annot_file.split("/")[-1])
-                with open(src_annot_file, "r") as fr, open(target_annot_file, "w") as fw:
-                    for coords in fr:
-                        annots = list(map(int, coords.strip().strip(",").split(",")))
-                        x, y = annots[0], annots[1]
-                        w, h = annots[2], annots[3]
-                        score, class_id, occu = annots[4], annots[5], annots[7]
-                        if class_id not in CLASS_2_CONSIDER:  # only keep classes to consider
+            iw, ih = imagesize.get(src_image_file)
+            target_annot_file = osp.join(target_annot_dir, osp.basename(src_annot_file))
+            
+            # Ensure the target directory exists
+            os.makedirs(osp.dirname(target_annot_file), exist_ok=True)
+            
+            with open(src_annot_file, "r") as fr, open(target_annot_file, "w") as fw:
+                for line_number, coords in enumerate(fr, start=1):
+                    try:
+                        # Filter out empty strings and convert the remaining ones to integers
+                        annots = [int(coord) for coord in coords.strip().split(",") if coord]
+                        if len(annots) < 8:  # Ensure there are enough elements in annots
+                            print(f"Warning: Skipping line {line_number} in {src_annot_file} due to insufficient data.")
+                            continue
+                        x, y, w, h = annots[:4]
+                        score, class_id, _, occu = annots[4], annots[5], annots[6], annots[7]
+                        if class_id not in CLASS_2_CONSIDER:
                             continue
                         orig_box_count += 1
-                        if w < low_dim_cutoff or h < low_dim_cutoff:  # cutoff value for dims to remove outliers
+                        if w < low_dim_cutoff or h < low_dim_cutoff or 100 * (w * h) / (iw * ih) < low_area_cutoff:
                             continue
-                        area_perc = 100 * (w * h) / (iw * ih)
-                        if area_perc < low_area_cutoff:  # cutoff value for area perc to remove outliers
-                            continue
-
+                        
                         xc, yc = x + (w / 2), y + (h / 2)
-                        # only use objects used for eval along and all levels of occlusion (0,1,2)
                         if score and occu <= 2:
-                            class_id = CLASS_ID_REMAP[class_id] if CLASS_ID_REMAP else class_id
+                            class_id = CLASS_ID_REMAP.get(class_id, class_id)
                             fw.write(f"{class_id} {xc/iw} {yc/ih} {w/iw} {h/ih}\n")
                             new_box_count += 1
-                target_image_path = osp.join(
-                    osp.dirname(osp.dirname(target_annot_file)),
-                    "images",
-                    osp.basename(target_annot_file).split(".")[0] + osp.splitext(src_image_file)[1],
-                )
-                imgw.write(f"{osp.abspath(target_image_path)}\n")
-            except Exception as excep:
-                print(f"{excep}: Error reading img {src_image_file}")
+                    except ValueError as e:
+                        print(f"Error processing line {line_number} in {src_annot_file}: {e}")
+            
+            # Correct handling for writing the image path
+            target_image_path = osp.join(osp.dirname(target_annot_dir), "images", osp.basename(src_image_file))
+            os.makedirs(osp.dirname(target_image_path), exist_ok=True)
+            imgw.write(f"{target_image_path}\n")
+            
             pbar.update(1)
+
         print(f"Original Box Count: {orig_box_count}. Converted Box Count {new_box_count}")
-        print(f"{100 * (new_box_count) / orig_box_count:.2f}% of total boxes kept")
+
 
 
 def main():

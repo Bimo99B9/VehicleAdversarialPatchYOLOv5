@@ -262,8 +262,9 @@ class PatchTester:
         patch_save_path = osp.join(self.cfg.savedir, self.cfg.patchfile.split("/")[-1])
         transforms.ToPILImage(self.cfg.patch_img_mode)(adv_patch_cpu).save(patch_save_path)
 
-        img_paths = glob.glob(osp.join(self.cfg.imgdir, "*"))
+        img_paths = glob.glob(osp.join(self.cfg.imgdir, "*")) # TODO: Throw error if no images
         img_paths = sorted([p for p in img_paths if osp.splitext(p)[-1] in IMG_EXTNS])
+        
 
         print("Total num images:", len(img_paths))
         img_paths = img_paths[:max_images]
@@ -359,18 +360,36 @@ class PatchTester:
             if save_txt:
                 textfile.close()
 
-            # save img
-            cleanname = img_name + ".jpg"
+            # Debug output for initial setup
+            # print(f"Saving all outputs to {self.cfg.savedir}")
+            # print(f"proper_img_dir before joining: {proper_img_dir}")
+            # print(f"Image name: {img_name}")
+
+            # Normalize the directory path and ensure it doesn't redundantly include 'images'
+            proper_img_dir_normalized = osp.normpath(proper_img_dir)
+
+            # Extract the filename, ensuring it does not contain path components
+            filename = osp.basename(img_name) + ".jpg"
+
+            # Join the normalized directory with the filename
+            final_path = osp.join(proper_img_dir_normalized, filename)
+            # print(f"Final path for saving the image: {final_path}")
+
+            # Ensure the directory exists
+            if not osp.exists(osp.dirname(final_path)):
+                os.makedirs(osp.dirname(final_path), exist_ok=True)
+
+            # Save the image using the corrected and verified path
             if save_image and save_orig_padded_image:
                 if draw_bbox_on_image:
-                    padded_img_drawn = PatchTester.draw_bbox_on_pil_image(
-                        all_labels[-1], padded_img_pil, self.cfg.class_list
-                    )
-                    padded_img_drawn.save(osp.join(clean_img_dir, cleanname))
+                    # Assuming this function correctly returns a PIL Image object
+                    padded_img_drawn = PatchTester.draw_bbox_on_pil_image(all_labels[-1], padded_img_pil, self.cfg.class_list)
+                    padded_img_drawn.save(final_path)
                 else:
-                    padded_img_pil.save(osp.join(clean_img_dir, cleanname))
+                    padded_img_pil.save(final_path)
 
-            # use a filler zeros array for no dets
+            # Additional code related to label handling
+            # Assuming `labels` is defined
             label = np.asarray(labels) if labels else np.zeros([1, 5])
             label = torch.from_numpy(label).float()
             if label.dim() == 1:
@@ -433,16 +452,30 @@ class PatchTester:
             if save_txt:
                 textfile.close()
 
-            # save properly patched img
+            # Normalize the directory path to ensure it doesn't redundantly include 'images'
+            proper_img_dir_normalized = osp.normpath(proper_img_dir)
+
+            # Extract the base filename, ensuring it does not contain path components
+            # Note: Adding ".jpg" is not needed if img_name already includes the extension
+            filename = osp.basename(img_name) + ".jpg"
+
+            # Construct the final path for saving the properly patched image
+            final_proper_path = osp.join(proper_img_dir_normalized, filename)
+            final_proper_path = osp.normpath(final_proper_path)
+
+            # Ensure the directory exists
+            if not osp.exists(osp.dirname(final_proper_path)):
+                os.makedirs(osp.dirname(final_proper_path), exist_ok=True)
+
+            # Save the properly patched image using the corrected and verified path
             if save_image:
                 p_img_pil = transforms_topil(p_tensor_batch.squeeze(0).cpu())
                 if draw_bbox_on_image:
-                    p_img_pil_drawn = PatchTester.draw_bbox_on_pil_image(
-                        all_patch_preds[-1], p_img_pil, self.cfg.class_list
-                    )
-                    p_img_pil_drawn.save(osp.join(proper_img_dir, properpatchedname))
+                    # Draw bounding boxes if required
+                    p_img_pil_drawn = PatchTester.draw_bbox_on_pil_image(all_patch_preds[-1], p_img_pil, self.cfg.class_list)
+                    p_img_pil_drawn.save(final_proper_path)  # Use the corrected path
                 else:
-                    p_img_pil.save(osp.join(proper_img_dir, properpatchedname))
+                    p_img_pil.save(final_proper_path)  # Use the corrected path for direct sav
 
             #######################################
             # Apply random patches
@@ -500,16 +533,30 @@ class PatchTester:
             if save_txt:
                 textfile.close()
 
-            # save randomly patched img
+            # Normalize the directory path to ensure it doesn't redundantly include 'images'
+            random_img_dir_normalized = osp.normpath(random_img_dir)
+
+            # Extract the base filename, ensuring it does not contain path components
+            # Assuming img_name already includes the proper extension, no need to add ".jpg" again
+            randompatchedname = osp.basename(img_name) + ".jpg"
+
+            # Construct the final path for saving the randomly patched image
+            final_random_path = osp.join(random_img_dir_normalized, randompatchedname)
+            final_random_path = osp.normpath(final_random_path)
+
+            # Ensure the directory exists
+            if not osp.exists(osp.dirname(final_random_path)):
+                os.makedirs(osp.dirname(final_random_path), exist_ok=True)
+
+            # Save the randomly patched image using the corrected and verified path
             if save_image:
                 p_img_pil = transforms_topil(p_tensor_batch.squeeze(0).cpu())
                 if draw_bbox_on_image:
-                    p_img_pil_drawn = PatchTester.draw_bbox_on_pil_image(
-                        all_noise_preds[-1], p_img_pil, self.cfg.class_list
-                    )
-                    p_img_pil_drawn.save(osp.join(random_img_dir, randompatchedname))
+                    # Draw bounding boxes if required
+                    p_img_pil_drawn = PatchTester.draw_bbox_on_pil_image(all_noise_preds[-1], p_img_pil, self.cfg.class_list)
+                    p_img_pil_drawn.save(final_random_path)  # Use the corrected path
                 else:
-                    p_img_pil.save(osp.join(random_img_dir, randompatchedname))
+                    p_img_pil.save(final_random_path)  # Use the corrected path for direct save
 
         del adv_batch_t, padded_img_tensor, p_tensor_batch
         torch.cuda.empty_cache()
