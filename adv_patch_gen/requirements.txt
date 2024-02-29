@@ -2,5 +2,5 @@
 Cython==3.0.8
 easydict==1.12
 pycocotools==2.0.6
-tensorboard==2.14.0
+tensorboard==2.16.2
 imagesize
