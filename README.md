@@ -1,5 +1,18 @@
 # YOLOv5 physical adversarial patch generation
 
+Note: This repository is based on https://github.com/Mikehuntisbald/yolov5_adversarial, which is based on https://github.com/SamSamhuns/yolov5_adversarial, and this one on https://github.com/ultralytics/yolov5. All the work before my commits is credited to the original authors.
+
+Some changes include:
+
+* Correct labels and images directories to match the set-up guide of the dataset
+* Fix the `base.json` *cfg*, since it only included some labels and produced errors when validating patches with `val.py`
+* Modify all the directory logic to work with the Windows directory system
+* Update the requirements file
+
+---
+
+Original README:
+
 [Paper: Towards a Robust Adversarial Patch Attack Against Unmanned Aerial Vehicles Object Detection](https://www.researchgate.net/publication/373548943_Towards_a_Robust_Adversarial_Patch_Attack_Against_Unmanned_Aerial_Vehicles_Object_Detection)
 
 <img src="adv_patch_gen/media/patch_on_cars.png" width="563" />
