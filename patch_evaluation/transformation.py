@@ -22,45 +22,38 @@ def draw_boxes(image, detection_results, resized_size, target_class="person"):
     scale_h = original_size[1] / resized_size[1]
 
     draw = ImageDraw.Draw(image)
-    # Use a default font. Adjust font size as needed.
     font = ImageFont.load_default()
-    # Default font size for the load_default font. Adjust as necessary.
     font_size = 10
 
     for i, bbox in enumerate(detection_results.boxes.xyxy):
         class_id = detection_results.boxes.cls[i]
         class_id = class_id.item() if isinstance(class_id, torch.Tensor) else class_id
         class_name = detection_results.names[class_id]
+
         if class_name == target_class:
             conf = detection_results.boxes.conf[i]  # Get the confidence score
             conf = conf.item() if isinstance(conf, torch.Tensor) else conf
 
-            # Scale the bounding box coordinates
-            left, top, right, bottom = (
-                int(bbox[0].item() * scale_w),
-                int(bbox[1].item() * scale_h),
-                int(bbox[2].item() * scale_w),
-                int(bbox[3].item() * scale_h),
-            )
+            # Check if the confidence is greater than 0.5
+            if conf > 0.5:
+                # Scale the bounding box coordinates
+                left, top, right, bottom = (
+                    int(bbox[0].item() * scale_w),
+                    int(bbox[1].item() * scale_h),
+                    int(bbox[2].item() * scale_w),
+                    int(bbox[3].item() * scale_h),
+                )
 
-            # Draw the bounding box
-            draw.rectangle([(left, top), (right, bottom)], outline="red", width=2)
+                # Draw the bounding box
+                draw.rectangle([(left, top), (right, bottom)], outline="red", width=2)
 
-            text = f"{class_name}: {conf:.2f}"
-            # Calculate text width and height
-            text_width = draw.textlength(text, font=font)
-            text_height = (
-                font_size  # Approximation for the height of a single line of text
-            )
+                text = f"{class_name}: {conf:.2f}"
+                text_width = draw.textlength(text, font=font)
+                text_height = font_size
 
-            # Calculate the position for the text background rectangle
-            text_position = (left, top - text_height)
-
-            # Draw background rectangle for text for better readability
-            draw.rectangle([text_position, (left + text_width, top)], fill="red")
-
-            # Draw the text
-            draw.text((left, top - text_height), text, fill="white", font=font)
+                text_position = (left, top - text_height)
+                draw.rectangle([text_position, (left + text_width, top)], fill="red")
+                draw.text((left, top - text_height), text, fill="white", font=font)
 
     return image
 
