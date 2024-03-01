@@ -35,7 +35,7 @@ def draw_boxes(image, detection_results, resized_size, target_class="person"):
             conf = conf.item() if isinstance(conf, torch.Tensor) else conf
 
             # Check if the confidence is greater than 0.5
-            if conf > 0.5:
+            if conf > 0.3:
                 # Scale the bounding box coordinates
                 left, top, right, bottom = (
                     int(bbox[0].item() * scale_w),
