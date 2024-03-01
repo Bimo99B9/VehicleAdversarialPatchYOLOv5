@@ -6,7 +6,7 @@
     "log_dir": "runs/train_adversarial",
     "tensorboard_port": 8994,
     "tensorboard_batch_log_interval": 15,
-    "weights_file": "models/yolov5s.pt",
+    "weights_file": "models/yolov5n.pt",
     "triplet_printfile": "adv_patch_gen/utils/30_rgb_triplets.csv",
     "device": "cuda:0",
     "use_amp": true,

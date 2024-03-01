@@ -1,0 +1,100 @@
+PS C:\Users\danil\Desktop\yolov5_adversarial> python .\test_patch.py --cfg adv_patch_gen/configs/base.json -w models/yolov5n.pt -p adv_patch_gen/media/visdrone_p.png --id data/VisDrone2019-DET-test-dev/images --sd runs/test --save-vid --save-img
+ Test Arguments: Namespace(class_agnostic=False, conf_thresh=0.4, config='adv_patch_gen/configs/base.json', device=None, imgdir='data/VisDrone2019-DET-test-dev/images', min_pixel_area=None, patchfile='adv_patch_gen/media/visdrone_p.png', savedir='runs/test', saveimg=True, saveplots=False, savetxt=False, savevideo=True, target_class=None, target_size_frac=0.3, weights='models/yolov5n.pt')
+YOLOv5  db4ef41 Python-3.8.10 torch-2.2.1+cu121 CUDA:0 (NVIDIA GeForce RTX 2060, 6144MiB)
+
+Fusing layers...
+YOLOv5n summary: 213 layers, 1867405 parameters, 0 gradients, 4.5 GFLOPs
+Saving all outputs to runs/test\20240229-211858_base
+Total num images: 1610
+Considered num images: 1610
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1610/1610 [02:19<00:00, 11.52it/s] 
+### Metrics for images with no patches for baseline. Should be ~1 ###
+loading annotations into memory...
+Done (t=0.02s)
+creating index...
+index created!
+Loading and preparing results...
+DONE (t=0.02s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=1.42s).
+Accumulating evaluation results...
+DONE (t=0.33s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 1.000
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 1.000
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 1.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 1.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 1.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 1.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.852
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.992
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 1.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 1.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 1.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 1.000
+### Metrics for images with correct patches ###
+loading annotations into memory...
+Done (t=0.02s)
+creating index...
+index created!
+Loading and preparing results...
+DONE (t=0.01s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=1.00s).
+Accumulating evaluation results...
+DONE (t=0.27s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.050
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.075
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.060
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.149
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.049
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.033
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.050
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.070
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.070
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.198
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.062
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.033
+ Attack success rate (@conf=0.4) | class_agnostic=False | area= small | = 0.520
+ Attack success rate (@conf=0.4) | class_agnostic=False | area=medium | = 0.624
+ Attack success rate (@conf=0.4) | class_agnostic=False | area= large | = 0.954
+ Attack success rate (@conf=0.4) | class_agnostic=False | area=   all | = 0.629
+
+### Metrics for images with random noise patches ###
+loading annotations into memory...
+Done (t=0.02s)
+creating index...
+index created!
+Loading and preparing results...
+DONE (t=0.01s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=1.12s).
+Accumulating evaluation results...
+DONE (t=0.27s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.125
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.155
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.144
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.339
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.123
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.074
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.099
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.136
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.137
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.349
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.136
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.075
+ Attack success rate (@conf=0.4) | class_agnostic=False | area= small | = 0.560
+ Attack success rate (@conf=0.4) | class_agnostic=False | area=medium | = 0.468
+ Attack success rate (@conf=0.4) | class_agnostic=False | area= large | = 0.762
+ Attack success rate (@conf=0.4) | class_agnostic=False | area=   all | = 0.503
+
+ Time to complete evaluation = 146.34642148017883 seconds
+PS C:\Users\danil\Desktop\yolov5_adversarial> 

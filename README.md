@@ -4,7 +4,7 @@ Note: This repository is based on https://github.com/Mikehuntisbald/yolov5_adver
 
 Some changes include:
 
-* Correct labels and images directories to match the set-up guide of the dataset
+* Correct labels and image directories to match the set-up guide of the dataset
 * Fix the `base.json` *cfg*, since it only included some labels and produced errors when validating patches with `val.py`
 * Modify all the directory logic to work with the Windows directory system
 * Update the requirements file
@@ -63,7 +63,7 @@ Instructions in creating the config json file present at [adv_patch_gen/configs/
 ## Test the performance of the adversarial patch
 
 ```shell
-python test_patch.py --cfg CONFIG_JSON_FILE -w YOLOV5_TARGET_MODEL_WEIGHTS_PATH -p PATCH_IMG_FILE_PATH --id IMG_DIR_PATH_FOR_TESTING --sd SAVE_DIR_PATH
+python .\test_patch.py --cfg adv_patch_gen/configs/base.json -w models/yolov5s.pt -p adv_patch_gen/media/visdrone_p.png --id data/VisDrone2019-DET-test-dev/images --sd runs/test --save-vid --save-img
 python test_patch.py -h  # to get a list of all testing options
 ```
 
