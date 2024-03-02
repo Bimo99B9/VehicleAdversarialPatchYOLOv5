@@ -35,7 +35,7 @@ def draw_boxes(image, detection_results, resized_size, target_class="person"):
             conf = conf.item() if isinstance(conf, torch.Tensor) else conf
 
             # Check if the confidence is greater than 0.5
-            if conf > 0.3:
+            if conf > 0.5:
                 # Scale the bounding box coordinates
                 left, top, right, bottom = (
                     int(bbox[0].item() * scale_w),
@@ -86,10 +86,12 @@ def apply_patch_to_image(
     resized_size,
     target_class="person",
     size_multiple=0.3,
+    patch_position="center",  # New parameter to control patch placement
 ):
     """
     Apply the adversarial patch to the image on the detected target class, maintaining the original aspect ratio of the patch
-    and resizing it to cover a specified portion of the bounding box.
+    and resizing it to cover a specified portion of the bounding box. Allows for the patch to be positioned at the center
+    or the upper part of the detection box based on the patch_position parameter.
 
     :param image: PIL Image, the original image.
     :param patch: Adversarial patch as a PIL Image or a PyTorch tensor.
@@ -97,6 +99,7 @@ def apply_patch_to_image(
     :param resized_size: Size of the image used for detection (width, height).
     :param target_class: The class of objects to target with the patch.
     :param size_multiple: Fraction of the bounding box to cover with the patch.
+    :param patch_position: Position of the patch within the detection box ("center" or "top").
     :return: Image with the adversarial patch applied.
     """
     original_size = image.size
@@ -126,7 +129,6 @@ def apply_patch_to_image(
             )
 
             box_width, box_height = x2 - x1, y2 - y1
-            # Calculate the size of the patch to maintain aspect ratio and cover the specified portion of the box
             target_width = int(box_width * size_multiple)
             target_height = int(target_width / patch_aspect_ratio)
 
@@ -134,16 +136,18 @@ def apply_patch_to_image(
                 target_height = int(box_height * size_multiple)
                 target_width = int(target_height * patch_aspect_ratio)
 
-            # Resize patch to fit the calculated size
             resized_patch = pil_patch.resize(
                 (target_width, target_height), Image.Resampling.LANCZOS
             )
 
-            # Calculate the position to place the patch (centered within the bounding box)
             paste_x = x1 + (box_width - target_width) // 2
-            paste_y = y1 + (box_height - target_height) // 2
+            if patch_position == "center":
+                paste_y = y1 + (box_height - target_height) // 2
+            elif patch_position == "top":
+                paste_y = (
+                    y1 + (box_height - target_height) // 4
+                )  # Adjusted to place the patch higher
 
-            # Paste the resized patch onto the image
             patched_image.paste(resized_patch, (paste_x, paste_y))
 
     return patched_image
