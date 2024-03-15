@@ -145,7 +145,7 @@ def apply_patch_to_image(
                 paste_y = y1 + (box_height - target_height) // 2
             elif patch_position == "top":
                 paste_y = (
-                    y1 + (box_height - target_height) // 4
+                    y1 + (box_height - target_height) // 3
                 )  # Adjusted to place the patch higher
 
             patched_image.paste(resized_patch, (paste_x, paste_y))

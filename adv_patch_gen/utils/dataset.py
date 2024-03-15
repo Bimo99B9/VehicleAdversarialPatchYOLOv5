@@ -54,6 +54,7 @@ class YOLODataset(Dataset):
             rem = 0 if use_even_odd_images == "even" else 1
             image_paths = [p for p in image_paths if int(osp.splitext(p)[0][-1]) % 2 == rem]
             label_paths = [p for p in label_paths if int(osp.splitext(p)[0][-1]) % 2 == rem]
+        # print(image_paths[:5], label_paths[:5])
         assert len(image_paths) == len(label_paths), "Number of images and number of labels don't match"
         # all corresponding image and labels must exist
         for img, lab in zip(image_paths, label_paths):
